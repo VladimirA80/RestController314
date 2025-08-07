@@ -1,11 +1,41 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
     <title>Spring Security Example</title>
 </head>
 <body>
 <h1>User, welcome spring boot security page!</h1>
 
+<div sec:authorize="isAuthenticated()">
+    <p>You are logged in as:</p>
+    <p>Security name: <span sec:authentication="name"></span></p>
+
+    <div th:if="${user}">
+
+        <table border="1">
+            <tr>
+                <th>First Name</th>
+                <th>Age</th>
+                <th>Email</th>
+            </tr>
+            <tr>
+                <td th:text="${user.firstName} ?: 'Not specified'"></td>
+                <td th:text="${user.age} ?: 'Not specified'"></td>
+                <td th:text="${user.email} ?: 'Not specified'"></td>
+            </tr>
+        </table>
+    </div>
+
+    <p>Roles:
+        <span sec:authentication="principal.authorities"></span>
+    </p>
+</div>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Logout</button>
+</form>
 
 </body>
 </html>

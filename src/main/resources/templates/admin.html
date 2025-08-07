@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+</head>
+<body>
+<h1>Пользователи:</h1>
+<!-- кнопка добавления нового пользователя  -->
+<form th:action="@{/admin/new}" method="get" style="display: inline-block; margin-bottom: 15px;">
+    <button type="submit" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Добавить нового пользователя
+    </button>
+</form>
+
+<table border ="1">
+    <tr>
+        <th>Id</th>
+        <th>Пользователь</th>
+        <th>Имя</th>
+        <th>Возраст</th>
+        <th>Почта</th>
+        <th>Роль</th>
+        <th>Пароль</th>
+        <th>Редактировать</th>
+        <th>Удалить</th>
+    </tr>
+
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.firstName}"></td>
+        <td th:text="${user.age}"></td>
+        <td th:text="${user.email}"></td>
+        <td th:text="${user.roles}"></td>
+        <td th:text="${user.password}"></td>
+        <td>
+            <!-- кнопки редактирование и удаление  -->
+            <form th:action="@{/admin/edit}" method="get" style="display: inline-block;">
+                <input type="hidden" name="id" th:value="${user.id}">
+                <button type="submit" class="btn btn-primary btn-sm">Edit</button>
+            </form>
+        </td>
+
+        <td>
+            <form th:action="@{/admin/delete}" method="post">
+                <input type="hidden" name="id" th:value="${user.id}">
+                <button type="submit" >Delete</button>
+            </form>
+        </td>
+    </tr>
+</table>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Logout</button>
+</form>
+
+</body>
+</html>
