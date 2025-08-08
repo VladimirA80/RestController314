@@ -27,4 +27,11 @@ public class RoleServiceImpl implements RoleService {
     public Set<Role> getAllRoles() {
         return roleDao.getAllRoles();
     }
+
+    @Override
+    public Role getRoleById(Long id) {
+        return roleDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+    }
+
 }

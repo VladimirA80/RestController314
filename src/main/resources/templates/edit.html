@@ -14,6 +14,17 @@
     <input type="number" th:field="*{age}" placeholder="Age">
     <input type="email" th:field="*{email}" placeholder="Email">
     <input type="password" th:field="*{password}" placeholder="Password">
+
+    <label for="role">Role:</label>
+    <select name="roleId" id="role">
+        <option value="">-- Select Role --</option>
+        <option th:each="role : ${allRoles}"
+                th:value="${role.id}"
+                th:text="${role.name}"
+                th:selected="${#lists.contains(user.roles, role)}">
+        </option>
+    </select>
+
     <input type="submit" value="Edit User"/>
 </form>
 </body>

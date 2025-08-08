@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,12 +38,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void saveUser(User user) {
+    public void saveUser(User user, Long roleId) {
         // Находим роль USER в базе
-        Role userRole = roleDao.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-        // Устанавливаем роль
-        user.setRoles(Set.of(userRole));
+        Role selectedRole = roleDao.findById(roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+        // Устанавливаем роль и кодируем пароль
+        user.setRoles(Set.of(selectedRole));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userDao.saveUser(user);
     }
@@ -75,7 +77,16 @@ public class UserServiceImpl implements UserService {
         existingUser.setFirstName(user.getFirstName());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
-        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        Set<Role> managedRoles = new HashSet<>();
+        for (Role role : user.getRoles()) {
+            Role managedRole = roleDao.findById(role.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Role not found"));
+            managedRoles.add(managedRole);
+        }
+        existingUser.setRoles(managedRoles);
         userDao.updateUser(existingUser);
     }
 

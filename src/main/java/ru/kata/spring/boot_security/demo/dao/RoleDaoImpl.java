@@ -47,5 +47,10 @@ public class RoleDaoImpl implements RoleDao {
             entityManager.merge(role);
         }
     }
+
+    @Override
+    public Optional<Role> findById(Long id) {
+        return Optional.ofNullable(entityManager.find(Role.class, id));
+    }
 }
 

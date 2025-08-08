@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface UserService {
     List<User> getAllUsers();
 
-    void saveUser(User user);
+    void saveUser(User user, Long roleId);
 
     User getUser(Long id);
 

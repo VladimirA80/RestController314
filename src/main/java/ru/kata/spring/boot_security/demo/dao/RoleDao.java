@@ -11,4 +11,6 @@ public interface RoleDao {
     Optional<Role> findByName(String name);
 
     void save(Role role);
+
+    public Optional<Role> findById(Long id);
 }
