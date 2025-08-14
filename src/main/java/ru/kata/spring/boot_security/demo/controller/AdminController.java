@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -40,18 +41,14 @@ public class AdminController {
     }
 
     @PostMapping
-    public String saveUser(@ModelAttribute("user") User user, @RequestParam("roleId") Long roleId) {
-        userService.saveUser(user, roleId);
+    public String saveUser(@ModelAttribute("user") User user, @RequestParam("roleIds") Set<Long> roleIds) {
+        userService.saveUser(user, roleIds);
         return "redirect:/admin"; // Перенаправление на список пользователей
     }
 
     @PostMapping("/delete")
     public String deleteUser(@RequestParam("id") Long id) {
-        try {
-            userService.deleteUser(id);
-        } catch (EmptyResultDataAccessException e) {
-            System.out.println("User not found " + e);
-        }
+        userService.deleteUser(id);
         return "redirect:/admin";
     }
 
@@ -63,10 +60,10 @@ public class AdminController {
     }
 
     @PostMapping("/update")
-    public String updateUser(@RequestParam("id") Long id, @ModelAttribute("user") User user, @RequestParam("roleId") Long roleId) {
-        Role selectedRole = roleService.getRoleById(roleId);
-        Set<Role> roles = new HashSet<>();
-        roles.add(selectedRole);
+    public String updateUser(@RequestParam("id") Long id, @ModelAttribute("user") User user, @RequestParam("roleIds") Set<Long> roleIds) {
+        Set<Role> roles = roleIds.stream()
+                .map(roleService::getRoleById)
+                .collect(Collectors.toSet());
         user.setRoles(roles);
         userService.updateUser(id, user);
         return "redirect:/admin";

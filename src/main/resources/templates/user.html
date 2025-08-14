@@ -3,39 +3,108 @@
       xmlns:th="https://www.thymeleaf.org"
       xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
-    <title>Spring Security Example</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spring Security Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 </head>
-<body>
-<h1>User, welcome spring boot security page!</h1>
 
-<div sec:authorize="isAuthenticated()">
-    <p>You are logged in as:</p>
-    <p>Security name: <span sec:authentication="name"></span></p>
+<div class="container-fluid">
+    <div class="row bg-dark text-white align-items-center">
+        <!-- Колонка на всю ширину -->
+        <div class="col p-3">
+            <span class="fw-bold" sec:authentication="name"></span>
+            <span th:text="' with roles: ' +
+                ${#strings.arrayJoin(
+                    #authentication.getAuthorities()
+                    .![#strings.replace(authority, 'ROLE_', '')],
+                ', ')}">
+            </span>
+        </div>
 
-    <div th:if="${user}">
-
-        <table border="1">
-            <tr>
-                <th>First Name</th>
-                <th>Age</th>
-                <th>Email</th>
-            </tr>
-            <tr>
-                <td th:text="${user.firstName} ?: 'Not specified'"></td>
-                <td th:text="${user.age} ?: 'Not specified'"></td>
-                <td th:text="${user.email} ?: 'Not specified'"></td>
-            </tr>
-        </table>
+        <div class="col-auto p-3">
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit"
+                        class="btn btn-link text-white p-0 border-0 bg-transparent text-decoration-none">
+                    Logout
+                </button>
+            </form>
+        </div>
     </div>
-
-    <p>Roles:
-        <span sec:authentication="principal.authorities"></span>
-    </p>
 </div>
 
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Logout</button>
-</form>
 
-</body>
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-tabs flex-column" id="myTab" role="tablist">
+            <!-- Вкладка Admin  -->
+            <li class="nav-item" th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+                <a class="nav-link active text-primary"
+                    th:href="@{/admin}"
+                    id="admin-tab"
+                    role="tab">
+                    <h5 class="mb-0">Admin</h5>
+                </a>
+            </li>
+
+            <!-- Вкладка User  -->
+            <li class="nav-item">
+                <span class="nav-link bg-primary text-white" id="user-tab" role="tab">
+                    <h5 class="mb-0">User</h5>
+                </span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="col-md-10 bg-light p-4">
+        <h4 class="text-dark mb-4 display-6 fw-bold">User Information Page</h4>
+
+        <div class="border rounded">
+            <!-- Заголовок "About user" -->
+            <div class="bg-secondary bg-opacity-10 text-black p-3 border-bottom">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i> About user
+                </h5>
+            </div>
+
+            <div class="px-3 pb-3 pt-3"> <!-- Отступы по бокам (px-3) и снизу (pb-3) -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle border-top">
+                        <thead class="bg-white">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">User Name</th>
+                            <th scope="col">First Name</th>
+                            <th scope="col">Age</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td th:text="${user.id} ?: 'Not specified'"></td>
+                            <td th:text="${user.username} ?: 'Not specified'"></td>
+                            <td th:text="${user.firstName} ?: 'Not specified'"></td>
+                            <td th:text="${user.age} ?: 'Not specified'"></td>
+                            <td th:text="${user.email} ?: 'Not specified'"></td>
+                            <td th:text="${#strings.listJoin(
+      #authentication?.principal?.authorities
+      .![#strings.replace(authority, 'ROLE_', '')],
+      ', ')} ?: 'Not specified'">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
 </html>

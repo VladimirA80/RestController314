@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -38,12 +39,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void saveUser(User user, Long roleId) {
+    public void saveUser(User user, Set<Long> roleIds) {
         // Находим роль USER в базе
-        Role selectedRole = roleDao.findById(roleId)
-                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+        Set<Role> managedRoles = roleIds.stream()
+                .map(roleId -> roleDao.findById(roleId)
+                        .orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId))
+                )
+                .collect(Collectors.toSet());
         // Устанавливаем роль и кодируем пароль
-        user.setRoles(Set.of(selectedRole));
+        user.setRoles(managedRoles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userDao.saveUser(user);
     }
@@ -51,19 +55,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User getUser(Long id) {
-        User user = userDao.getUser(id);
-        if (user == null) {
-            throw new IllegalArgumentException("User with id " + id + " not found");
-        }
-        return user;
+        return Optional.ofNullable(userDao.getUser(id))
+                .orElseThrow(() -> new IllegalArgumentException("User with id " + id + " not found"));
     }
 
     @Override
     public void deleteUser(Long id) {
         User user = userDao.getUser(id);
-        if (user == null) {
-            throw new IllegalArgumentException("User with id " + id + " not found");
-        }
         userDao.deleteUser(user);
     }
 
