@@ -23,8 +23,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form th:method="POST" th:action="@{/admin/update}" th:object="${user}">
-                    <input type="hidden" name="id" th:value="*{id}"/>
+                <form id="editForm">
+                    <input type="hidden" id="userIdField" th:value="${user.id}"/>
 
                     <div class="form-group text-center">
                         <label for="userId" class="fw-bold text-dark">ID</label>
@@ -38,35 +38,37 @@
 
                     <div class="form-group text-center">
                         <label for="username" class="fw-bold text-dark">Username</label>
-                        <input type="text" class="form-control" id="username" th:field="*{username}"
+                        <input type="text" class="form-control" id="username" th:value="${user.username}"
                                placeholder="Username">
                     </div>
 
                     <div class="form-group text-center">
                         <label for="firstName" class="fw-bold text-dark">First Name</label>
-                        <input type="text" class="form-control" id="firstName" th:field="*{firstName}"
+                        <input type="text" class="form-control" id="firstName" th:value="${user.firstName}"
                                placeholder="First Name">
                     </div>
 
                     <div class="form-group text-center">
                         <label for="age" class="fw-bold text-dark">Age</label>
-                        <input type="number" class="form-control" id="age" th:field="*{age}" placeholder="Age">
+                        <input type="number" class="form-control" id="age" th:value="${user.age}"
+                               placeholder="Age">
                     </div>
 
                     <div class="form-group text-center">
                         <label for="email" class="fw-bold text-dark">Email</label>
-                        <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="Email">
+                        <input type="email" class="form-control" id="email" th:value="${user.email}"
+                               placeholder="Email">
                     </div>
 
                     <div class="form-group text-center">
                         <label for="password" class="fw-bold text-dark">Password</label>
-                        <input type="password" class="form-control" id="password" th:field="*{password}"
+                        <input type="password" class="form-control" id="password" th:value="${user.password}"
                                placeholder="Password">
                     </div>
 
                     <div class="form-group text-center">
                         <label class="form-label fw-bold d-block text-center">Roles:</label>
-                        <select name="roleIds" multiple required style="min-height: 100px;">
+                        <select id="roleIds" name="roleIds" multiple required style="min-height: 100px;">
                             <option th:each="role : ${allRoles}"
                                     th:value="${role.id}"
                                     th:text="${#strings.replace(role.name, 'ROLE_', '')}"
@@ -80,7 +82,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             </i> Close
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="button" id="submit" class="btn btn-primary">
                             </i> Save Changes
                         </button>
                     </div>
@@ -105,7 +107,63 @@
         document.getElementById('editUserModal')?.addEventListener('hidden.bs.modal', function () {
             window.location.href = '/admin';
         });
+        document.getElementById('submit').addEventListener('click', function() {
+            submitForm();
+        });
     });
+
+    function submitForm() {
+        // Получаем ID пользователя
+        const userId = document.getElementById('userIdField').value;
+
+          // Собираем выбранные роли
+        const roleSelect = document.getElementById('roleIds');
+        const roleIds = Array.from(roleSelect.selectedOptions)
+            .map(option => option.value)
+            .filter(id => id !== '');
+
+        // Собираем данные пользователя
+        const userData = {
+            id: parseInt(userId),
+            username: document.getElementById('username').value,
+            firstName: document.getElementById('firstName').value,
+            age: parseInt(document.getElementById('age').value) || 0,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            roles: Array.from(roleSelect.selectedOptions).map(option => {
+                return { id: parseInt(option.value) };
+            })
+        };
+
+        console.log('Sending data:', userData, 'Role IDs:', roleIds);
+
+        // Отправляем PUT запрос
+        fetch('/api/admin/' + userId + '?roleIds=' + roleIds.join(','), {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                console.log('Success:', data);
+                // Закрываем модальное окно и перезагружаем страницу
+                var modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+                modal.hide();
+                window.location.href = '/admin';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating user: ' + error.message);
+            });
+    }
+
 </script>
 </body>
 </html>

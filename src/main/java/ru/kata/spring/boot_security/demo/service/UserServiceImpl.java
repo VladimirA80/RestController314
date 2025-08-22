@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void saveUser(User user, Set<Long> roleIds) {
+    public User saveUser(User user, Set<Long> roleIds) {
         // Находим роль USER в базе
         Set<Role> managedRoles = roleIds.stream()
                 .map(roleId -> roleDao.findById(roleId)
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
         // Устанавливаем роль и кодируем пароль
         user.setRoles(managedRoles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userDao.saveUser(user);
+        return userDao.saveUser(user);
     }
 
     @Override
@@ -66,18 +66,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(Long id, User user) {
-        User existingUser = userDao.getUser(id);
+    public User updateUser(Long id, User user) {
+        User existingUser = getUser(id);
         if (existingUser == null) {
             throw new IllegalArgumentException("User with id " + id + " not found");
+        }
+
+        // Обработка пароля
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            } else {
+                user.setPassword(existingUser.getPassword());
+            }
+        } else {
+            user.setPassword(existingUser.getPassword());
         }
         existingUser.setUsername(user.getUsername());
         existingUser.setFirstName(user.getFirstName());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
+
         Set<Role> managedRoles = new HashSet<>();
         for (Role role : user.getRoles()) {
             Role managedRole = roleDao.findById(role.getId())
@@ -85,7 +94,7 @@ public class UserServiceImpl implements UserService {
             managedRoles.add(managedRole);
         }
         existingUser.setRoles(managedRoles);
-        userDao.updateUser(existingUser);
+        return userDao.updateUser(existingUser);
     }
 
     @Override

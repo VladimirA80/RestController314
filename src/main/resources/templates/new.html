@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,7 +23,6 @@
             </span>
         </div>
 
-
         <div class="col-auto p-3">
             <form th:action="@{/logout}" method="post" class="m-0">
                 <button type="submit"
@@ -39,7 +36,7 @@
 
 <div class="row">
     <div class="col-md-2">
-        <!-- <Боковые табы Admin и User> -->
+        <!-- Боковые табы Admin и User -->
         <ul class="nav nav-tabs flex-column" id="myTab" role="tablist">
             <li class="nav-item">
                  <span class="nav-link active bg-primary text-white" id="admin-tab" role="tab">
@@ -57,88 +54,139 @@
         </ul>
     </div>
 
-<!-- <Надпись Admin Panel> -->
-<div class="col-md-10 bg-light p-4">
-    <h4 class="text-dark mb-4 display-6 fw-bold">Admin Panel</h4>
+    <!-- Надпись Admin Panel -->
+    <div class="col-md-10 bg-light p-4">
+        <h4 class="text-dark mb-4 display-6 fw-bold">Admin Panel</h4>
 
-    <div class="row">
-        <div class="col-md-12">
-            <!-- Навигация табов - закладок -->
-            <ul class="nav nav-tabs mb-3" id="usersTab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link text-primary" th:href="@{/admin/}" id="users-tab">
-                        Users Table
-                    </a>
-                </li>
-                <li class="nav-item">
-                <span class="nav-link active text-dark">
-                    New User
-                </span>
-                </li>
-            </ul>
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Навигация табов - закладок -->
+                <ul class="nav nav-tabs mb-3" id="usersTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" th:href="@{/admin/}" id="users-tab">
+                            Users Table
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                    <span class="nav-link active text-dark">
+                        New User
+                    </span>
+                    </li>
+                </ul>
 
-            <div class="border rounded">
-                <div class="bg-secondary bg-opacity-10 text-black p-3 border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user"></i> Add new user
-                    </h5>
-                </div>
+                <div class="border rounded">
+                    <div class="bg-secondary bg-opacity-10 text-black p-3 border-bottom">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user"></i> Add new user
+                        </h5>
+                    </div>
 
-                <form th:action="@{/admin}" th:object="${user}" method="post" class="container mt-4">
-                    <div class="row justify-content-center">
-                        <div class="col-md-6">
-                            <!-- Username -->
-                            <div class="mb-3">
-                                <label for="username" class="form-label fw-bold">Username</label>
-                                <input type="text" class="form-control bg-warning bg-opacity-25" th:field="*{username}" id="username" required>
-                            </div>
+                    <!-- Убрали th:action и th:object, добавили id для формы -->
+                    <form id="userForm" class="container mt-4">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <!-- Username -->
+                                <div class="mb-3">
+                                    <label for="username" class="form-label fw-bold">Username</label>
+                                    <input type="text" class="form-control bg-warning bg-opacity-25" id="username" required>
+                                </div>
 
-                            <!-- First Name -->
-                            <div class="mb-3">
-                                <label for="firstName" class="form-label fw-bold">First Name</label>
-                                <input type="text" class="form-control bg-warning bg-opacity-25" th:field="*{firstName}" id="firstName">
-                            </div>
+                                <!-- First Name -->
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label fw-bold">First Name</label>
+                                    <input type="text" class="form-control bg-warning bg-opacity-25" id="firstName">
+                                </div>
 
-                            <!-- Age -->
-                            <div class="mb-3">
-                                <label for="age" class="form-label fw-bold">Age</label>
-                                <input type="number" class="form-control" th:field="*{age}" id="age" min="1">
-                            </div>
+                                <!-- Age -->
+                                <div class="mb-3">
+                                    <label for="age" class="form-label fw-bold">Age</label>
+                                    <input type="number" class="form-control" id="age" min="1">
+                                </div>
 
-                            <!-- Email -->
-                            <div class="mb-3">
-                                <label for="email" class="form-label fw-bold">Email</label>
-                                <input type="email" class="form-control bg-warning bg-opacity-25" th:field="*{email}" id="email">
-                            </div>
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label for="email" class="form-label fw-bold">Email</label>
+                                    <input type="email" class="form-control bg-warning bg-opacity-25" id="email">
+                                </div>
 
-                            <!-- Password -->
-                            <div class="mb-3">
-                                <label for="password" class="form-label fw-bold">Password</label>
-                                <input type="password" class="form-control" th:field="*{password}" id="password" required>
-                            </div>
+                                <!-- Password -->
+                                <div class="mb-3">
+                                    <label for="password" class="form-label fw-bold">Password</label>
+                                    <input type="password" class="form-control" id="password" required>
+                                </div>
 
-                            <!-- Roles -->
-                            <div class="mb-3">
-                                <label for="roles" class="form-label fw-bold">Roles</label>
-                                <select class="form-select" id="roles" name="roleIds" multiple size="4">
-                                    <option th:each="role : ${allRoles}"
-                                            th:value="${role.id}"
-                                            th:text="${role.name}"
-                                            th:selected="${user.roles.?[id == role.id].size() > 0}">
-                                    </option>
-                                </select>
-                                <div class="form-text">Для выбора нескольких ролей удерживайте Ctrl</div>
-                            </div>
+                                <!-- Roles -->
+                                <div class="mb-3">
+                                    <label for="roles" class="form-label fw-bold">Roles</label>
+                                    <select class="form-select" id="roles" name="roleIds" multiple size="4">
+                                        <option th:each="role : ${allRoles}"
+                                                th:value="${role.id}"
+                                                th:text="${role.name}">
+                                        </option>
+                                    </select>
+                                    <div class="form-text">Для выбора нескольких ролей удерживайте Ctrl</div>
+                                </div>
 
-                            <!-- Кнопка -->
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
-                                <button type="submit" class="btn btn-success me-md-2">Add new user</button>
+                                <!-- Кнопка - изменили на button type="button" с вызовом функции -->
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                                    <button type="button" onclick="createUser()" class="btn btn-success me-md-2">Add new user</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Bootstrap 5 JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JavaScript для работы с REST API -->
+<script>
+    async function createUser() {
+        const roleSelect = document.getElementById('roles');
+
+        const userData = {
+            username: document.getElementById('username').value,
+            firstName: document.getElementById('firstName').value,
+            age: parseInt(document.getElementById('age').value) || 0,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            roles: Array.from(roleSelect.selectedOptions).map(option => {
+                return { id: parseInt(option.value) };
+            })
+        };
+
+        // Валидация обязательных полей
+        if (!userData.username || !userData.password) {
+            alert('Username and password are required!');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/save-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // Убрали CSRF заголовок
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (response.ok) {
+                window.location.href = '/admin'; // Перенаправляем на страницу со списком пользователей
+            } else {
+                const error = await response.text();
+                alert('Ошибка: ' + error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ошибка сети');
+        }
+    }
+</script>
+
 </body>
 </html>
