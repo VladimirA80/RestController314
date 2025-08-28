@@ -39,7 +39,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User saveUser(User user, Set<Long> roleIds) {
+    public User saveUser(User user) {
+        // Извлекаем ID ролей из переданного объекта User
+        Set<Long> roleIds = user.getRoles().stream()
+                .map(Role::getId)
+                .collect(Collectors.toSet());
+
         // Находим роль USER в базе
         Set<Role> managedRoles = roleIds.stream()
                 .map(roleId -> roleDao.findById(roleId)
@@ -66,33 +71,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, User user) {
+    public User updateUser(Long id, User user, Set<Long> roleIds) {
         User existingUser = getUser(id);
-        if (existingUser == null) {
-            throw new IllegalArgumentException("User with id " + id + " not found");
+        // Обработка пароля
+        String incomingPassword = user.getPassword();
+        if (incomingPassword != null && !incomingPassword.isEmpty()) {
+            // Проверяем, не совпадает ли пароль с текущим
+            boolean isSamePassword = incomingPassword.equals(existingUser.getPassword()) ||
+                    passwordEncoder.matches(incomingPassword, existingUser.getPassword());
+
+            if (!isSamePassword) {
+                // Если пароль похож на зашифрованный (длина 60 символов или начинается с $2)
+                if (incomingPassword.length() == 60 ||
+                        incomingPassword.startsWith("$2a$") ||
+                        incomingPassword.startsWith("$2b$") ||
+                        incomingPassword.startsWith("$2y$")) {
+                    existingUser.setPassword(incomingPassword);
+                } else {
+                    existingUser.setPassword(passwordEncoder.encode(incomingPassword));
+                }
+            }
         }
 
-        // Обработка пароля
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-            } else {
-                user.setPassword(existingUser.getPassword());
-            }
-        } else {
-            user.setPassword(existingUser.getPassword());
-        }
         existingUser.setUsername(user.getUsername());
         existingUser.setFirstName(user.getFirstName());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
 
-        Set<Role> managedRoles = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            Role managedRole = roleDao.findById(role.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Role not found"));
-            managedRoles.add(managedRole);
-        }
+        Set<Role> managedRoles = roleIds.stream()
+                .map(roleId -> roleDao.findById(roleId)
+                        .orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId))
+                )
+                .collect(Collectors.toSet());
+
         existingUser.setRoles(managedRoles);
         return userDao.updateUser(existingUser);
     }

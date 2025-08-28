@@ -38,10 +38,7 @@ public class AdminRestController {
 
     @PostMapping("/save-user")
     public ResponseEntity<User> saveUser(@RequestBody User user) {
-        Set<Long> roleIds = user.getRoles().stream()
-                .map(Role::getId)
-                .collect(Collectors.toSet());
-        User savedUser = userService.saveUser(user, roleIds);
+        User savedUser = userService.saveUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
@@ -53,11 +50,7 @@ public class AdminRestController {
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user, @RequestParam("roleIds") Set<Long> roleIds) {
-        Set<Role> roles = roleIds.stream()
-                .map(roleService::getRoleById)
-                .collect(Collectors.toSet());
-        user.setRoles(roles);
-        User updatedUser = userService.updateUser(id, user);
+        User updatedUser = userService.updateUser(id, user, roleIds);
         return ResponseEntity.ok(updatedUser);
     }
 
